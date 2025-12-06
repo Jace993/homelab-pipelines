@@ -1,0 +1,10 @@
+
+    steps:
+      - name: Run Ansible playbook.
+        working-directory: ./playbooks
+        run: |
+            for playbook in *.yml; do
+            echo "Running playbook: $playbook"
+            ansible-playbook "$playbook"
+
+
