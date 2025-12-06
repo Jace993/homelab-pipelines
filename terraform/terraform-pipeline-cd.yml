@@ -1,0 +1,42 @@
+trigger: none
+
+resources:
+  repositories:
+    - repository: templates
+      type: git
+      name: radboud-universiteit/azdo-cct-rumulusplatform/pipeline-templates
+      ref: main
+
+# Trigger CD wanneer CI klaar is
+pr: none
+resources:
+  pipelines:
+    - pipeline: Terraform_CI
+      source: default-terraform-pipeline-ci
+      trigger:
+        branches:
+          include:
+            - main
+
+stages:
+- stage: Terraform_CD
+  displayName: 'Terraform CD'
+  dependsOn: []
+  approval:
+    - approvers:
+        - alz-mgmt-approvers
+      timeout: 7200
+      instructions: 'Wil je de Terraform apply uitvoeren?'
+  jobs:
+  - deployment: Terraform
+    environment: 'production'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - template: terraform/install_ssh_key.yml@templates
+            parameters:
+              sshKey: $(sshPrivateKey)
+          - template: terraform/apply.yml@templates
+            parameters:
+              autoApprove: true

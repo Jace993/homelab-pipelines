@@ -1,0 +1,11 @@
+steps:
+  - task: TerraformCLI@1
+    inputs:
+      command: "init"
+      workingDirectory: "$(System.DefaultWorkingDirectory)"
+      backendType: "azurerm"
+      backendServiceArm: ${{ parameters.backendConfig.backendServiceArm }}
+      backendAzureRmResourceGroupName: ${{ parameters.backendConfig.resourceGroupName }}
+      backendAzureRmStorageAccountName: ${{ parameters.backendConfig.storageAccountName }}
+      backendAzureRmContainerName: ${{ parameters.backendConfig.containerName }}
+      backendAzureRmKey: ${{ parameters.backendConfig.key }}

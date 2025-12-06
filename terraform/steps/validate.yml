@@ -1,0 +1,5 @@
+steps:
+  - task: TerraformCLI@1
+    inputs:
+      command: "validate"
+      workingDirectory: "$(System.DefaultWorkingDirectory)"

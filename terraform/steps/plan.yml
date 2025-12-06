@@ -1,0 +1,6 @@
+steps:
+  - task: TerraformCLI@1
+    inputs:
+      command: "plan"
+      workingDirectory: "$(System.DefaultWorkingDirectory)"
+      environmentServiceNameAzureRM: "$(serviceConnectionName)"

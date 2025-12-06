@@ -1,0 +1,20 @@
+trigger:
+  - main
+
+resources:
+  repositories:
+    - repository: templates
+      type: git
+      name: radboud-universiteit/azdo-cct-rumulusplatform/pipeline-templates
+      ref: main
+stages:
+  - stage: Terraform_CI
+    jobs:
+      - job: Terraform
+        steps:
+          - template: install_ssh_key.yml@templates
+            parameters:
+              sshKey: $(sshPrivateKey)
+          - template: fmt.yml@templates
+          - template: validate.yml@templates
+          - template: plan.yml@templates

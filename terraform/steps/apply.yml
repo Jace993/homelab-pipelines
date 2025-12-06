@@ -1,0 +1,12 @@
+parameters:
+  - name: autoApprove
+    type: boolean
+    default: true
+
+steps:
+  - task: TerraformCLI@1
+    inputs:
+      command: "apply"
+      workingDirectory: "$(System.DefaultWorkingDirectory)"
+      environmentServiceNameAzureRM: "$(serviceConnectionName)"
+      args: ${{ parameters.autoApprove && '-auto-approve' || '' }}
