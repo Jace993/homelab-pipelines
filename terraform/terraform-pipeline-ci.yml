@@ -1,20 +1,52 @@
-trigger:
-  - main
+name: Terraform CI
 
-resources:
-  repositories:
-    - repository: templates
-      type: git
-      name: radboud-universiteit/azdo-cct-rumulusplatform/pipeline-templates
-      ref: main
-stages:
-  - stage: Terraform_CI
-    jobs:
-      - job: Terraform
-        steps:
-          - template: install_ssh_key.yml@templates
-            parameters:
-              sshKey: $(sshPrivateKey)
-          - template: fmt.yml@templates
-          - template: validate.yml@templates
-          - template: plan.yml@templates
+on:
+  workflow_call:
+    inputs:
+      terraform_repo:
+        description: "Repo containing Terraform code"
+        required: true
+        type: string
+      terraform_path:
+        description: "Path inside the Terraform repo"
+        required: true
+        type: string
+      tf_action:
+        description: "plan or apply"
+        required: false
+        default: "plan"
+        type: string
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout pipelines repo (optional)
+        uses: actions/checkout@v4
+
+      - name: Checkout Terraform repo
+        uses: actions/checkout@v4
+        with:
+          repository: Jace993/homelab-tf-resources
+          token: ${{ secrets.CI_PAT }} # PAT with repo read access
+          path: ./
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        working-directory: ./
+        run: terraform init
+
+      - name: Terraform Plan/Apply
+        working-directory: ./
+        run: |
+          if [ "${{ inputs.tf_action }}" = "apply" ]; then
+            terraform apply -auto-approve
+          else
+            terraform plan
+          fi

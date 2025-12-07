@@ -1,42 +1,52 @@
-trigger: none
+name: Terraform Deploy (central)
 
-resources:
-  repositories:
-    - repository: templates
-      type: git
-      name: radboud-universiteit/azdo-cct-rumulusplatform/pipeline-templates
-      ref: main
+on:
+  workflow_call:
+    inputs:
+      terraform_repo:
+        description: "Repo containing Terraform code"
+        required: true
+        type: string
+      terraform_path:
+        description: "Path inside the Terraform repo"
+        required: true
+        type: string
+      tf_action:
+        description: "plan or apply"
+        required: false
+        default: "plan"
+        type: string
 
-# Trigger CD wanneer CI klaar is
-pr: none
-resources:
-  pipelines:
-    - pipeline: Terraform_CI
-      source: default-terraform-pipeline-ci
-      trigger:
-        branches:
-          include:
-            - main
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
 
-stages:
-- stage: Terraform_CD
-  displayName: 'Terraform CD'
-  dependsOn: []
-  approval:
-    - approvers:
-        - alz-mgmt-approvers
-      timeout: 7200
-      instructions: 'Wil je de Terraform apply uitvoeren?'
-  jobs:
-  - deployment: Terraform
-    environment: 'production'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - template: terraform/install_ssh_key.yml@templates
-            parameters:
-              sshKey: $(sshPrivateKey)
-          - template: terraform/apply.yml@templates
-            parameters:
-              autoApprove: true
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout pipelines repo (optional)
+        uses: actions/checkout@v4
+
+      - name: Checkout Terraform repo
+        uses: actions/checkout@v4
+        with:
+          repository: Jace993/homelab-tf-resources
+          token: ${{ secrets.CI_PAT }} # PAT with repo read access
+          path: terraform-src
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        working-directory: terraform-src/${{ inputs.terraform_path }}
+        run: terraform init
+
+      - name: Terraform Plan/Apply
+        working-directory: terraform-src/${{ inputs.terraform_path }}
+        run: |
+          if [ "${{ inputs.tf_action }}" = "apply" ]; then
+            terraform apply -auto-approve
+          else
+            terraform plan
+          fi

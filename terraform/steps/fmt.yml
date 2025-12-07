@@ -1,7 +1,0 @@
-steps:
-  - task: TerraformCLI@1
-    inputs:
-      command: "fmt"
-      workingDirectory: "$(System.DefaultWorkingDirectory)"
-      ensurePlugins: true
-      check: true
