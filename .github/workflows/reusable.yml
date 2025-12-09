@@ -1,0 +1,16 @@
+name: Reusable Workflow
+
+on:
+  workflow_call:
+
+jobs:
+  my-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Run some task
+        run: |
+          echo "Running reusable workflow"
+          echo "This can be any task you want"
