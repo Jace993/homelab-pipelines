@@ -9,12 +9,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Run some task
-        run: |
-          echo "Running reusable workflow"
-          echo "This can be any task you want"
-          # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
         with:
